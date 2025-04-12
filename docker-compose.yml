@@ -12,6 +12,19 @@ services:
       - ./backend:/app
     depends_on:
       - db
+    networks:
+      - showcasify-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - showcasify-network
 
   db:
     image: postgres:15-alpine
@@ -23,6 +36,12 @@ services:
       - POSTGRES_DB=showcasify
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - showcasify-network
 
 volumes:
-  postgres_data: 
+  postgres_data:
+
+networks:
+  showcasify-network:
+    driver: bridge 
