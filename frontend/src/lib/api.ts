@@ -1,70 +1,146 @@
 import axios from 'axios';
 
-// Define API base URL with fallback
+// Base API URL from environment or default to localhost
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-console.log('Using API URL:', API_URL);
-
-// Create axios instance
-const api = axios.create({
+// Create axios instance with base URL
+export const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  // Handle CORS
-  withCredentials: false,
 });
 
-// Define Todo interface
-export interface Todo {
-  id: number;
-  title: string;
-  description: string | null;
-  completed: boolean;
+// Add request interceptor to attach token
+api.interceptors.request.use(
+  (config) => {
+    // Get token from localStorage
+    const token = typeof window !== 'undefined' 
+      ? localStorage.getItem('auth-storage') 
+      : null;
+    
+    if (token) {
+      try {
+        const parsedStorage = JSON.parse(token);
+        const authToken = parsedStorage.state?.token;
+        if (authToken) {
+          config.headers.Authorization = `Bearer ${authToken}`;
+        }
+      } catch (error) {
+        console.error('Error parsing auth token:', error);
+      }
+    }
+    
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Types for our API responses
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  bio?: string | null;
+  role?: string;
+  avatar_url?: string | null;
   created_at: string;
-  updated_at: string | null;
+  updated_at?: string | null;
 }
 
-// Create new Todo type without id and timestamps (for creating new todos)
-export type CreateTodoInput = Pick<Todo, 'title' | 'description' | 'completed'>;
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}
 
-// Create Todo update type with all fields optional
-export type UpdateTodoInput = Partial<CreateTodoInput>;
-
-// Todo API service
-export const todoApi = {
-  // Get all todos
-  getAll: async (): Promise<Todo[]> => {
+// Auth API functions
+export const authApi = {
+  // Login with email and password
+  login: async (email: string, password: string) => {
+    // Create form data for OAuth2 token endpoint
+    // Note: The backend expects username (not email) in the form data
+    const formData = new FormData();
+    formData.append('username', email); // using email as username
+    formData.append('password', password);
+    
+    console.log('API: Sending OAuth2 login request to', API_URL + '/auth/token');
     try {
-      const response = await api.get<Todo[]>('/todos/');
+      const response = await api.post('/auth/token', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('API: Login response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching todos:', error);
-      return [];
+      console.error('API: Login error:', error);
+      throw error;
     }
   },
-
-  // Get a single todo by ID
-  getById: async (id: number): Promise<Todo> => {
-    const response = await api.get<Todo>(`/todos/${id}`);
+  
+  // Register new user
+  register: async (name: string, email: string, password: string) => {
+    const response = await api.post('/users/', {
+      name,
+      email,
+      password,
+    });
     return response.data;
   },
-
-  // Create a new todo
-  create: async (todo: CreateTodoInput): Promise<Todo> => {
-    const response = await api.post<Todo>('/todos/', todo);
+  
+  // Get current user info
+  getMe: async () => {
+    const response = await api.get('/users/me');
+    return response;
+  },
+  
+  // Update user profile
+  updateProfile: async (data: Partial<User>) => {
+    const response = await api.put('/users/me', data);
+    return response;
+  },
+  
+  // Upload user avatar
+  uploadAvatar: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await api.post('/users/me/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
+  },
+  
+  // Request password reset
+  forgotPassword: async (email: string) => {
+    const response = await api.post('/auth/forgot-password', { email });
     return response.data;
   },
-
-  // Update an existing todo
-  update: async (id: number, todo: UpdateTodoInput): Promise<Todo> => {
-    const response = await api.put<Todo>(`/todos/${id}`, todo);
+  
+  // Reset password with token
+  resetPassword: async (token: string, password: string) => {
+    const response = await api.post('/auth/reset-password', {
+      token,
+      password,
+    });
     return response.data;
   },
+};
 
-  // Delete a todo
-  delete: async (id: number): Promise<void> => {
-    await api.delete(`/todos/${id}`);
+// User API functions
+export const userApi = {
+  // Get all users (admin only)
+  getUsers: async () => {
+    const response = await api.get('/users');
+    return response.data;
+  },
+  
+  // Get user by ID
+  getUserById: async (id: string) => {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
   },
 };
 
