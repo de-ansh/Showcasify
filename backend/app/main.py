@@ -1,10 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import todo
+from fastapi.staticfiles import StaticFiles
+from app.routers import user, auth, password
 from app.database.database import engine, Base
+import os
+import logging
+from pathlib import Path
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+# Create uploads directory if it doesn't exist
+UPLOAD_DIR = Path("./uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+(UPLOAD_DIR / "avatars").mkdir(exist_ok=True)
 
 app = FastAPI(title="Showcasify API")
 
@@ -17,8 +32,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # Include routers
-app.include_router(todo.router)
+app.include_router(user.router)
+app.include_router(auth.router)
+app.include_router(password.router)
 
 @app.get("/")
 async def root():

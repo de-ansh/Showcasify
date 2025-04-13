@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
-import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
+import { Toaster } from "sonner";
+import { AuthInitializer } from "@/components/auth/auth-initializer";
 
 export const metadata: Metadata = {
-  title: "Showcasify Todo App",
-  description: "A modern Todo application built with Next.js, FastAPI, and PostgreSQL",
+  title: "Showcasify",
+  description: "Showcase your work and connect with others",
 };
 
 export default function RootLayout({
@@ -15,10 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${GeistSans.className} antialiased`}>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+      <body className={GeistSans.className}>
+        <AuthInitializer />
+        {children}
+        <Toaster />
       </body>
     </html>
   );
