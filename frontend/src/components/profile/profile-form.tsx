@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -102,9 +103,11 @@ export function ProfileForm() {
           >
             <div className="h-32 w-32 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
               {user.avatar_url ? (
-                <img 
+                <Image 
                   src={user.avatar_url} 
                   alt={user.name} 
+                  width={128}
+                  height={128}
                   className="h-full w-full object-cover"
                 />
               ) : (

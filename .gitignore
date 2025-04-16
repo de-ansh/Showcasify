@@ -89,3 +89,4 @@ out/
 .serverless/
 .fusebox/
 .dynamodb/ 
+.ini
