@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { api, authApi } from './api';
 import { toast } from 'sonner';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { AxiosError } from 'axios';
 
 export interface User {
   id: string;
@@ -19,6 +20,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  lastFetchTime: number | null;
   
   // Actions
   setToken: (token: string | null) => void;
@@ -42,6 +44,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       isLoading: false,
+      lastFetchTime: null,
       
       setToken: (token) => {
         set({ token });
@@ -63,18 +66,10 @@ export const useAuthStore = create<AuthState>()(
       login: async (email, password) => {
         try {
           set({ isLoading: true });
-          console.log('AuthStore: Calling login API...');
           const response = await authApi.login(email, password);
-          console.log('AuthStore: Login API response:', response);
-          
-          // The FastAPI auth token endpoint returns access_token directly
           const { access_token } = response;
-          console.log('AuthStore: Got access token, setting token...');
           get().setToken(access_token);
-          
-          console.log('AuthStore: Fetching user data...');
           await get().fetchUser();
-          console.log('AuthStore: Login complete');
           toast.success('Logged in successfully');
         } catch (error) {
           console.error('AuthStore: Login error:', error);
@@ -93,10 +88,9 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true });
           await authApi.register(name, email, password);
           toast.success('Registration successful! Please log in.');
-          /* eslint-disable  @typescript-eslint/no-explicit-any */
-
-        } catch (error: any) {
-          toast.error(error.response?.data?.detail || 'Failed to register');
+        } catch (error) {
+          const axiosError = error as AxiosError<{ detail: string }>;
+          toast.error(axiosError.response?.data?.detail || 'Failed to register');
           throw error;
         } finally {
           set({ isLoading: false });
@@ -106,19 +100,28 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         get().setToken(null);
         get().setUser(null);
+        set({ lastFetchTime: null });
         toast.success('Logged out successfully');
       },
       
       fetchUser: async () => {
-        const { token } = get();
+        const { token, lastFetchTime } = get();
         if (!token) return;
+        
+        // Only fetch if we haven't fetched in the last 5 minutes
+        const now = Date.now();
+        if (lastFetchTime && now - lastFetchTime < 5 * 60 * 1000) {
+          return;
+        }
         
         try {
           set({ isLoading: true });
           const response = await authApi.getMe();
           get().setUser(response.data);
-        } catch (error: any) {
-          if (error.response?.status === 401) {
+          set({ lastFetchTime: now });
+        } catch (error) {
+          const axiosError = error as AxiosError;
+          if (axiosError.response?.status === 401) {
             get().logout();
           }
         } finally {
@@ -132,9 +135,9 @@ export const useAuthStore = create<AuthState>()(
           const response = await authApi.updateProfile(data);
           get().setUser(response.data);
           toast.success('Profile updated successfully');
-          
-        } catch (error: any) {
-          toast.error(error.response?.data?.detail || 'Failed to update profile');
+        } catch (error) {
+          const axiosError = error as AxiosError<{ detail: string }>;
+          toast.error(axiosError.response?.data?.detail || 'Failed to update profile');
           throw error;
         } finally {
           set({ isLoading: false });
@@ -147,8 +150,9 @@ export const useAuthStore = create<AuthState>()(
           const response = await authApi.uploadAvatar(file);
           get().setUser({...get().user, ...response.data} as User);
           toast.success('Avatar uploaded successfully');
-        } catch (error: any) {
-          toast.error(error.response?.data?.detail || 'Failed to upload avatar');
+        } catch (error) {
+          const axiosError = error as AxiosError<{ detail: string }>;
+          toast.error(axiosError.response?.data?.detail || 'Failed to upload avatar');
           throw error;
         } finally {
           set({ isLoading: false });
@@ -160,8 +164,9 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true });
           await authApi.forgotPassword(email);
           toast.success('Password reset email sent. Please check your inbox.');
-        } catch (error: any) {
-          toast.error(error.response?.data?.detail || 'Failed to send reset email');
+        } catch (error) {
+          const axiosError = error as AxiosError<{ detail: string }>;
+          toast.error(axiosError.response?.data?.detail || 'Failed to send reset email');
           throw error;
         } finally {
           set({ isLoading: false });
@@ -173,8 +178,9 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true });
           await authApi.resetPassword(token, password);
           toast.success('Password reset successfully. Please log in with your new password.');
-        } catch (error: any) {
-          toast.error(error.response?.data?.detail || 'Failed to reset password');
+        } catch (error) {
+          const axiosError = error as AxiosError<{ detail: string }>;
+          toast.error(axiosError.response?.data?.detail || 'Failed to reset password');
           throw error;
         } finally {
           set({ isLoading: false });
