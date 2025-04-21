@@ -13,11 +13,21 @@ import { AuthInitializer } from "@/components/auth/auth-initializer";
 
 const navigationItems = [
   {
+    title: 'Home',
+    href: '/',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+      </svg>
+    ),
+  },
+  {
     title: 'Dashboard',
     href: '/dashboard',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+        <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+        <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
       </svg>
     ),
   },
@@ -42,7 +52,7 @@ const navigationItems = [
 ];
 
 // List of public routes that don't require authentication
-const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
 
 export default function RootLayout({
   children,
@@ -81,7 +91,7 @@ export default function RootLayout({
               <header className="bg-white dark:bg-gray-800 shadow-sm">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <Link href="/" className="text-xl font-bold">
+                    <Link href="/dashboard" className="text-xl font-bold">
                       Showcasify
                     </Link>
                   </div>

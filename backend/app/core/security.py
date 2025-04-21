@@ -5,9 +5,16 @@ from jose import jwt
 from passlib.context import CryptContext
 
 # These should be in environment variables in a production environment
-SECRET_KEY = "YOUR_SECRET_KEY_HERE"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-if-not-set")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
