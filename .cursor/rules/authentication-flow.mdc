@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Authentication Flow
+
+The application uses a custom authentication system with the following components and flow:
+
+## Components
+1. [AuthInitializer](mdc:frontend/src/components/auth/auth-initializer.tsx) - Handles initial auth state loading
+2. [RegisterForm](mdc:frontend/src/components/auth/register-form.tsx) - User registration
+3. [AuthStore](mdc:frontend/src/lib/auth.ts) - Global auth state management using Zustand
+
+## Flow
+1. On app load, AuthInitializer checks for existing session
+2. Public routes are accessible without authentication
+3. Protected routes redirect to login if no session exists
+4. After successful login/registration, user is redirected to dashboard
+
+## Route Protection
+- Protected routes check auth state in [layout.tsx](mdc:frontend/src/app/layout.tsx)
+- Unauthorized access redirects to login page
+- Public routes are defined in layout.tsx: ['/', '/login', '/register', '/forgot-password', '/reset-password']
+
+## State Management
+- Auth state is managed globally using Zustand store
+- State includes: user data, loading state, error handling
+- Persistent session handling across page reloads

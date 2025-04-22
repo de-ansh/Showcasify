@@ -1,0 +1,38 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Styling Conventions
+
+The application follows these styling conventions and uses the following tools:
+
+## Core Technologies
+- TailwindCSS for utility-first styling
+- CSS Modules for component-specific styles
+- Framer Motion for animations
+- Geist Sans as the primary font
+
+## Class Naming Conventions
+1. Use TailwindCSS utility classes for most styling
+2. Follow the pattern: `{property}-{size/color/variant}`
+3. Use `dark:` prefix for dark mode variants
+4. Use `hover:`, `focus:`, etc. for interactive states
+
+## Component Structure
+- UI components in [components/ui](mdc:frontend/src/components/ui)
+- Consistent spacing using TailwindCSS scale
+- Responsive design using breakpoint prefixes: sm:, md:, lg:, xl:
+
+## Theme
+- Color scheme defined in tailwind.config.js
+- Dark mode support using `dark:` variants
+- Primary color used for brand elements
+- Consistent spacing and sizing scale
+
+## Best Practices
+1. Use semantic HTML elements
+2. Maintain responsive design
+3. Ensure dark mode compatibility
+4. Follow accessibility guidelines
+5. Use CSS variables for theme values
