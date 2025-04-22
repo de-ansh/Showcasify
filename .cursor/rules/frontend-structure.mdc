@@ -1,0 +1,40 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Frontend Application Structure
+
+This is a Next.js application with the following key components and structure:
+
+## Package Management
+- ALWAYS use PNPM as the package manager
+- Install dependencies: `pnpm install`
+- Add new dependencies: `pnpm add <package-name>`
+- Add dev dependencies: `pnpm add -D <package-name>`
+- Run scripts: `pnpm run <script-name>`
+- Start development server: `pnpm dev`
+
+## Core Files
+- Main entry: [src/app/layout.tsx](mdc:frontend/src/app/layout.tsx) - Root layout with authentication handling
+- Landing page: [src/app/page.tsx](mdc:frontend/src/app/page.tsx) - Public landing page with animations
+- Global styles: [src/app/globals.css](mdc:frontend/src/app/globals.css)
+
+## Authentication
+- Register form: [src/components/auth/register-form.tsx](mdc:frontend/src/components/auth/register-form.tsx)
+- Auth state management: [src/lib/auth.ts](mdc:frontend/src/lib/auth.ts)
+- Auth initializer: [src/components/auth/auth-initializer.tsx](mdc:frontend/src/components/auth/auth-initializer.tsx)
+
+## Routing Structure
+- Public routes: '/', '/login', '/register', '/forgot-password', '/reset-password'
+- Protected routes: '/dashboard', '/settings/profile', '/settings/security'
+
+## UI Components
+All reusable UI components are stored in [src/components/ui](mdc:frontend/src/components/ui)
+
+## Key Features
+1. Authentication with protected routes
+2. Dark mode support
+3. Responsive layout
+4. Animated landing page
+5. Dashboard with sidebar navigation
