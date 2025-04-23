@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routers import user, auth, password
+from app.routers import user, auth, password, profile
 from app.database.database import engine, Base
 import os
 import logging
@@ -20,6 +20,7 @@ Base.metadata.create_all(bind=engine)
 UPLOAD_DIR = Path("./uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 (UPLOAD_DIR / "avatars").mkdir(exist_ok=True)
+(UPLOAD_DIR / "projects").mkdir(exist_ok=True)  # Add directory for project images
 
 app = FastAPI(title="Showcasify API")
 
@@ -39,6 +40,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(password.router)
+app.include_router(profile.router)
 
 @app.get("/")
 async def root():

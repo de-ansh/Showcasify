@@ -35,13 +35,7 @@ This is the FastAPI backend for the Showcasify application.
    uvicorn app.main:app --reload
    ```
 
-## API Endpoints
-
-- `GET /todos/`: List all todos
-- `POST /todos/`: Create a new todo
-- `GET /todos/{id}`: Get a specific todo
-- `PUT /todos/{id}`: Update a todo
-- `DELETE /todos/{id}`: Delete a todo
+s
 
 ## API Documentation
 
