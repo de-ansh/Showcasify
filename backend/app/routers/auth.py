@@ -2,6 +2,7 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+import jwt
 
 from app.core.security import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.crud import user as user_crud
@@ -15,7 +16,7 @@ router = APIRouter(
     responses={401: {"description": "Unauthorized"}},
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(

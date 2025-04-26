@@ -24,7 +24,7 @@ export function LoginDebugForm() {
     
     try {
       // Try JSON format
-      const response = await axios.post(`${API_URL}/auth/login`, { 
+      const response = await axios.post(`${API_URL}/api/auth/login`, { 
         email, 
         password 
       }, {
@@ -36,7 +36,7 @@ export function LoginDebugForm() {
       setResult({
         success: true,
         data: response.data,
-        endpoint: '/auth/login',
+        endpoint: '/api/auth/login',
         format: 'JSON'
       });
     } catch (jsonError: any) {
@@ -48,7 +48,7 @@ export function LoginDebugForm() {
         formData.append('username', email);
         formData.append('password', password);
         
-        const formResponse = await axios.post(`${API_URL}/auth/token`, formData, {
+        const formResponse = await axios.post(`${API_URL}/api/auth/token`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -57,7 +57,7 @@ export function LoginDebugForm() {
         setResult({
           success: true,
           data: formResponse.data,
-          endpoint: '/auth/token',
+          endpoint: '/api/auth/token',
           format: 'FormData'
         });
       } catch (formError: any) {
