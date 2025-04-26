@@ -63,9 +63,9 @@ export const authApi = {
     formData.append('username', email); // using email as username
     formData.append('password', password);
     
-    console.log('API: Sending OAuth2 login request to', API_URL + '/auth/token');
+    console.log('API: Sending OAuth2 login request to', API_URL + '/api/auth/token');
     try {
-      const response = await api.post('/auth/token', formData, {
+      const response = await api.post('/api/auth/token', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -80,7 +80,7 @@ export const authApi = {
   
   // Register new user
   register: async (name: string, email: string, password: string) => {
-    const response = await api.post('/users/', {
+    const response = await api.post('/api/users/', {
       name,
       email,
       password,
@@ -90,13 +90,13 @@ export const authApi = {
   
   // Get current user info
   getMe: async () => {
-    const response = await api.get('/users/me');
+    const response = await api.get('/api/users/me');
     return response;
   },
   
   // Update user profile
   updateProfile: async (data: Partial<User>) => {
-    const response = await api.put('/users/me', data);
+    const response = await api.put('/api/users/me', data);
     return response;
   },
   
@@ -105,7 +105,7 @@ export const authApi = {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await api.post('/users/me/avatar', formData, {
+    const response = await api.post('/api/users/me/avatar', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -115,13 +115,13 @@ export const authApi = {
   
   // Request password reset
   forgotPassword: async (email: string) => {
-    const response = await api.post('/auth/forgot-password', { email });
+    const response = await api.post('/api/auth/forgot-password', { email });
     return response.data;
   },
   
   // Reset password with token
   resetPassword: async (token: string, password: string) => {
-    const response = await api.post('/auth/reset-password', {
+    const response = await api.post('/api/auth/reset-password', {
       token,
       password,
     });
@@ -133,13 +133,13 @@ export const authApi = {
 export const userApi = {
   // Get all users (admin only)
   getUsers: async () => {
-    const response = await api.get('/users');
+    const response = await api.get('/api/users');
     return response.data;
   },
   
   // Get user by ID
   getUserById: async (id: string) => {
-    const response = await api.get(`/users/${id}`);
+    const response = await api.get(`/api/users/${id}`);
     return response.data;
   },
 };

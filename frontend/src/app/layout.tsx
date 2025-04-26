@@ -10,6 +10,7 @@ import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { AuthInitializer } from "@/components/auth/auth-initializer";
+import { Providers } from '@/lib/providers';
 
 const navigationItems = [
   {
@@ -83,71 +84,73 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={GeistSans.className}>
-        <AuthInitializer />
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          {!isPublicRoute && user && (
-            <>
-              {/* Top Bar */}
-              <header className="bg-white dark:bg-gray-800 shadow-sm">
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <Link href="/dashboard" className="text-xl font-bold">
-                      Showcasify
-                    </Link>
+        <Providers>
+          <AuthInitializer />
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {!isPublicRoute && user && (
+              <>
+                {/* Top Bar */}
+                <header className="bg-white dark:bg-gray-800 shadow-sm">
+                  <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <Link href="/dashboard" className="text-xl font-bold">
+                        Showcasify
+                      </Link>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
+                        {user.name}
+                      </span>
+                      <Button variant="outline" size="sm" onClick={() => logout()}>
+                        Logout
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-600 dark:text-gray-300">
-                      {user.name}
-                    </span>
-                    <Button variant="outline" size="sm" onClick={() => logout()}>
-                      Logout
-                    </Button>
-                  </div>
+                </header>
+
+                <div className="flex">
+                  {/* Sidebar */}
+                  <aside className="w-64 bg-white dark:bg-gray-800 shadow-sm h-[calc(100vh-4rem)] fixed">
+                    <nav className="p-4">
+                      <ul className="space-y-2">
+                        {navigationItems.map((item) => (
+                          <li key={item.href}>
+                            <Link
+                              href={item.href}
+                              className={cn(
+                                'flex items-center space-x-3 px-4 py-2 rounded-md text-sm font-medium',
+                                'hover:bg-gray-100 dark:hover:bg-gray-700',
+                                'text-gray-700 dark:text-gray-300',
+                                'transition-colors',
+                                pathname === item.href && 'bg-gray-100 dark:bg-gray-700'
+                              )}
+                            >
+                              {item.icon}
+                              <span>{item.title}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+                  </aside>
+
+                  {/* Main Content */}
+                  <main className="flex-1 ml-64 p-8">
+                    {children}
+                  </main>
                 </div>
-              </header>
+              </>
+            )}
 
-              <div className="flex">
-                {/* Sidebar */}
-                <aside className="w-64 bg-white dark:bg-gray-800 shadow-sm h-[calc(100vh-4rem)] fixed">
-                  <nav className="p-4">
-                    <ul className="space-y-2">
-                      {navigationItems.map((item) => (
-                        <li key={item.href}>
-                          <Link
-                            href={item.href}
-                            className={cn(
-                              'flex items-center space-x-3 px-4 py-2 rounded-md text-sm font-medium',
-                              'hover:bg-gray-100 dark:hover:bg-gray-700',
-                              'text-gray-700 dark:text-gray-300',
-                              'transition-colors',
-                              pathname === item.href && 'bg-gray-100 dark:bg-gray-700'
-                            )}
-                          >
-                            {item.icon}
-                            <span>{item.title}</span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                </aside>
-
-                {/* Main Content */}
-                <main className="flex-1 ml-64 p-8">
-                  {children}
-                </main>
-              </div>
-            </>
-          )}
-
-          {/* Public routes content */}
-          {isPublicRoute && (
-            <main className="min-h-screen">
-              {children}
-            </main>
-          )}
-        </div>
-        <Toaster />
+            {/* Public routes content */}
+            {isPublicRoute && (
+              <main className="min-h-screen">
+                {children}
+              </main>
+            )}
+          </div>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

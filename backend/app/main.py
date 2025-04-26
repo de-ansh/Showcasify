@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+<<<<<<< HEAD
 from app.routers import user, auth, password, profile
+=======
+from app.routers import user, auth, password, education, experiences, projects
+>>>>>>> 6c61fe0 (backend and frontend to collect data (#7))
 from app.database.database import engine, Base
 import os
 import logging
@@ -22,7 +26,7 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 (UPLOAD_DIR / "avatars").mkdir(exist_ok=True)
 (UPLOAD_DIR / "projects").mkdir(exist_ok=True)  # Add directory for project images
 
-app = FastAPI(title="Showcasify API")
+app = FastAPI(title="Showcasify API", prefix="/api")
 
 # Configure CORS
 app.add_middleware(
@@ -36,11 +40,14 @@ app.add_middleware(
 # Mount static files
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-# Include routers
-app.include_router(user.router)
-app.include_router(auth.router)
-app.include_router(password.router)
-app.include_router(profile.router)
+# Include routers with API prefix
+api_prefix = "/api"
+app.include_router(user.router, prefix=api_prefix)
+app.include_router(auth.router, prefix=api_prefix)
+app.include_router(password.router, prefix=api_prefix)
+app.include_router(education.router, prefix=api_prefix)
+app.include_router(experiences.router, prefix=api_prefix)
+app.include_router(projects.router, prefix=api_prefix)
 
 @app.get("/")
 async def root():

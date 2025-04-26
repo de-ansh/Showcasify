@@ -1,172 +1,204 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
+import { TextInput, TextareaInput } from "@/components/ui/form-fields";
+import { useProjects, useProjectCreate, useProjectUpdate, useProjectDelete } from "@/lib/hooks/use-projects";
+import { type Project } from "@/lib/api/projects";
 
-interface Project {
-  id?: number;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date?: string;
-  is_current: boolean;
-  url?: string;
-  technologies?: string;
-}
+const projectSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  project_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  github_url: z.string().url("Please enter a valid URL").optional().or(z.literal(""))
+});
 
-interface ProjectFormProps {
-  onSuccess: () => void;
-}
+type ProjectFormValues = z.infer<typeof projectSchema>;
 
-export function ProjectForm({ onSuccess }: ProjectFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [project, setProject] = useState<Project>({
-    title: "",
-    description: "",
-    start_date: "",
-    end_date: "",
-    is_current: false,
-    url: "",
-    technologies: "",
+export function ProjectForm() {
+  const [editingId, setEditingId] = useState<number | null>(null);
+  
+  // React Query hooks
+  const { data: projects = [], isLoading } = useProjects();
+  const createMutation = useProjectCreate();
+  const updateMutation = useProjectUpdate(editingId || 0);
+  const deleteMutation = useProjectDelete();
+  
+  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm<ProjectFormValues>({
+    resolver: zodResolver(projectSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      project_url: "",
+      github_url: ""
+    }
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const onSubmit = async (data: ProjectFormValues) => {
     try {
-      const response = await fetch("/api/profile/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(project),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save project");
+      if (editingId !== null) {
+        // Update existing project
+        await updateMutation.mutateAsync(data);
+      } else {
+        // Create new project
+        await createMutation.mutateAsync(data);
       }
-
-      toast.success("Project saved successfully");
-      onSuccess();
-      setProject({
-        title: "",
-        description: "",
-        start_date: "",
-        end_date: "",
-        is_current: false,
-        url: "",
-        technologies: "",
-      });
+      
+      reset();
+      setEditingId(null);
     } catch (error) {
       console.error("Error saving project:", error);
-      toast.error("Failed to save project");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setProject(prev => ({ ...prev, [name]: value }));
+  const handleEdit = (project: Project) => {
+    setValue("title", project.title);
+    setValue("description", project.description || "");
+    setValue("project_url", project.project_url || "");
+    setValue("github_url", project.github_url || "");
+    setEditingId(project.id);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this project?")) {
+      return;
+    }
+    
+    try {
+      await deleteMutation.mutateAsync(id);
+    } catch (error) {
+      console.error("Error deleting project:", error);
+    }
+  };
+
+  const handleCancel = () => {
+    reset();
+    setEditingId(null);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="title">Project Title</Label>
-          <Input
-            id="title"
-            name="title"
-            value={project.title}
-            onChange={handleChange}
-            placeholder="My Awesome Project"
-            required
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h3 className="text-lg font-medium mb-4">
+          {editingId ? "Edit Project" : "Add New Project"}
+        </h3>
+        
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <TextInput
+            label="Project Title"
+            {...register("title")}
+            error={errors.title?.message}
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="url">Project URL</Label>
-          <Input
-            id="url"
-            name="url"
-            type="url"
-            value={project.url}
-            onChange={handleChange}
-            placeholder="https://example.com"
+          
+          <TextareaInput
+            label="Description"
+            {...register("description")}
+            error={errors.description?.message}
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="technologies">Technologies Used</Label>
-          <Input
-            id="technologies"
-            name="technologies"
-            value={project.technologies}
-            onChange={handleChange}
-            placeholder="React, Node.js, PostgreSQL"
+          
+          <TextInput
+            label="Project URL"
+            {...register("project_url")}
+            error={errors.project_url?.message}
+            placeholder="https://..."
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="start_date">Start Date</Label>
-          <Input
-            id="start_date"
-            name="start_date"
-            type="date"
-            value={project.start_date}
-            onChange={handleChange}
-            required
+          
+          <TextInput
+            label="GitHub URL"
+            {...register("github_url")}
+            error={errors.github_url?.message}
+            placeholder="https://github.com/..."
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="end_date">End Date</Label>
-          <Input
-            id="end_date"
-            name="end_date"
-            type="date"
-            value={project.end_date}
-            onChange={handleChange}
-            disabled={project.is_current}
-          />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="is_current"
-            name="is_current"
-            checked={project.is_current}
-            onCheckedChange={(checked) => 
-              setProject(prev => ({ ...prev, is_current: checked as boolean }))
-            }
-          />
-          <Label htmlFor="is_current">Currently Working</Label>
-        </div>
+          
+          <div className="flex space-x-2">
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+              {createMutation.isPending || updateMutation.isPending ? "Saving..." : (editingId ? "Update Project" : "Add Project")}
+            </Button>
+            
+            {editingId && (
+              <Button type="button" variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+            )}
+          </div>
+        </form>
       </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          name="description"
-          value={project.description}
-          onChange={handleChange}
-          placeholder="Describe your project..."
-          rows={4}
-          required
-        />
+      
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h3 className="text-lg font-medium p-6 border-b">Your Projects</h3>
+        
+        {isLoading ? (
+          <div className="p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="p-6 text-center text-gray-500">
+            You haven&apos;t added any projects yet.
+          </div>
+        ) : (
+          <ul className="divide-y">
+            {projects.map((project) => (
+              <li key={project.id} className="p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium">{project.title}</h4>
+                    {project.description && (
+                      <p className="text-gray-600 dark:text-gray-400 mt-1">{project.description}</p>
+                    )}
+                    
+                    <div className="mt-2 space-x-4">
+                      {project.project_url && (
+                        <a 
+                          href={project.project_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
+                        >
+                          View Project
+                        </a>
+                      )}
+                      
+                      {project.github_url && (
+                        <a 
+                          href={project.github_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
+                        >
+                          GitHub
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEdit(project)}
+                    >
+                      Edit
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDelete(project.id)}
+                      className="text-red-600 hover:text-red-700 dark:text-red-400"
+                      disabled={deleteMutation.isPending}
+                    >
+                      {deleteMutation.isPending && deleteMutation.variables === project.id ? "Deleting..." : "Delete"}
+                    </Button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Saving..." : "Save Project"}
-      </Button>
-    </form>
+    </div>
   );
 } 
