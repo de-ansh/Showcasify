@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.user import User
+from app.models.profile import ProfessionalInfo
 from app.schemas.user import UserCreate, UserUpdate
 from app.core.security import get_password_hash, verify_password
 from typing import List, Optional
@@ -17,20 +18,28 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email).first()
 
 def create_user(db: Session, user: UserCreate) -> User:
-    # Hash the password
     hashed_password = get_password_hash(user.password)
-    
-    # Create user with hashed password
+
     db_user = User(
         email=user.email,
         name=user.name,
         password=hashed_password,
-        role=user.role
+        role=user.role,
     )
-    
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
+    professional_info = ProfessionalInfo(
+        user_id=db_user.id,
+        contact_info=dict(),
+        social_links=dict(),
+        skills=list(),
+        profile_image_url=None,
+    )
+    db.add(professional_info)
+    db.commit()
+
     return db_user
 
 def update_user(db: Session, user_id: uuid.UUID, user: UserUpdate) -> Optional[User]:

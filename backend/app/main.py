@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-<<<<<<< HEAD
-from app.routers import user, auth, password, profile
-=======
-from app.routers import user, auth, password, education, experiences, projects
->>>>>>> 6c61fe0 (backend and frontend to collect data (#7))
+from app.routers import user, auth, password, education, experiences, projects, preferences
 from app.database.database import engine, Base
 import os
 import logging
@@ -48,6 +44,7 @@ app.include_router(password.router, prefix=api_prefix)
 app.include_router(education.router, prefix=api_prefix)
 app.include_router(experiences.router, prefix=api_prefix)
 app.include_router(projects.router, prefix=api_prefix)
+app.include_router(preferences.router, prefix=api_prefix)
 
 @app.get("/")
 async def root():

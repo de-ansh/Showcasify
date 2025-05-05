@@ -1,17 +1,26 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Date, Boolean, DateTime
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSON
 import uuid
+from datetime import datetime
 from app.database.database import Base
 
 class Project(Base):
     __tablename__ = "projects"
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    title = Column(String, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True)
+    professional_info_id = Column(UUID(as_uuid=True), ForeignKey("professional_info.id"), nullable=False)
+    name = Column(String(200), nullable=False)
     description = Column(Text)
-    project_url = Column(String)
-    github_url = Column(String)
+    technologies = Column(JSON)  # Array of technologies used
+    start_date = Column(Date)
+    end_date = Column(Date)
+    is_current = Column(Boolean, default=False)
+    project_url = Column(String(255))
+    github_url = Column(String(255))
+    achievements = Column(JSON)  # Array of key achievements
+    images = Column(JSON)  # Array of project image URLs
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    user = relationship("User", back_populates="projects")
+    professional_info = relationship("ProfessionalInfo", back_populates="projects")
