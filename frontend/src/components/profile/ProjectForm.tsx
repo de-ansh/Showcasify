@@ -18,7 +18,7 @@ const projectSchema = z.object({
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
 
-export function ProjectForm() {
+export function ProjectForm( {onSuccess}: {onSuccess: () => void} ) {
   const [editingId, setEditingId] = useState<number | null>(null);
   
   // React Query hooks

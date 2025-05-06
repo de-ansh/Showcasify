@@ -30,7 +30,7 @@ const educationSchema = z.object({
 
 type EducationFormValues = z.infer<typeof educationSchema>;
 
-export function EducationForm() {
+export function EducationForm( {onSuccess}: {onSuccess: () => void} ) {
   const [editingId, setEditingId] = useState<number | null>(null);
   
   // React Query hooks
