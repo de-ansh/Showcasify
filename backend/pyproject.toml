@@ -1,0 +1,50 @@
+[project]
+name = "showcasify-backend"
+version = "0.1.0"
+description = "AI-powered portfolio generator backend"
+authors = [
+    {name = "Showcasify Team"}
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.104.1",
+    "uvicorn>=0.24.0",
+    "sqlalchemy>=2.0.23",
+    "psycopg2-binary>=2.9.9",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.3",
+    "alembic>=1.12.1",
+    "passlib>=1.7.4",
+    "bcrypt>=4.0.1",
+    "email-validator>=2.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    "python-multipart>=0.0.9",
+    "PyJWT>=2.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+    "black",
+    "isort",
+    "flake8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
