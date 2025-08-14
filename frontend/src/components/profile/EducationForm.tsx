@@ -73,6 +73,7 @@ export function EducationForm( {onSuccess}: {onSuccess: () => void} ) {
       
       reset();
       setEditingId(null);
+      onSuccess(); // Call the success callback
     } catch (error) {
       console.error("Error saving education:", error);
     }

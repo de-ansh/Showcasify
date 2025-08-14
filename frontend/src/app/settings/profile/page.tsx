@@ -28,6 +28,12 @@ export default function ProfileSettingsPage() {
     );
   }
 
+  // Success callback functions for forms
+  const handleSuccess = () => {
+    // You can add toast notifications or other success handling here
+    console.log('Operation completed successfully');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
@@ -53,11 +59,11 @@ export default function ProfileSettingsPage() {
           </TabsContent>
 
           <TabsContent value="projects" className="mt-6">
-            <ProjectForm />
+            <ProjectForm onSuccess={handleSuccess} />
           </TabsContent>
 
           <TabsContent value="education" className="mt-6">
-            <EducationForm />
+            <EducationForm onSuccess={handleSuccess} />
           </TabsContent>
 
           <TabsContent value="experience" className="mt-6">

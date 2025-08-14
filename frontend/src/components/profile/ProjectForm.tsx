@@ -49,6 +49,7 @@ export function ProjectForm( {onSuccess}: {onSuccess: () => void} ) {
       
       reset();
       setEditingId(null);
+      onSuccess(); // Call the success callback
     } catch (error) {
       console.error("Error saving project:", error);
     }
